@@ -46,9 +46,9 @@ if st.button('abre la puerta'):
 else:
     st.write('Cierra la puerta')
 
-if st.button('OFF'):
+if st.button('Cierra la puerta'):
     act1="Cierra la puerta"
-    client1= paho.Client("GIT-HUB")
+    client1= paho.Client("GIT-majoo")
     client1.on_publish = on_publish
     client1.connect(broker,port)
     message =json.dumps({"Act1":act1})
