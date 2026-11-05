@@ -68,7 +68,7 @@ if st.button('enciende las luces'):
     ret= client1.publish("voice_Majooo", message)
 
 else:
-    st.write('apaga las luces')
+   
 
 if st.button('apaga las luces'):
     act1="apaga las luces"
