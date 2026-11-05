@@ -67,8 +67,7 @@ if st.button('enciende las luces'):
     message =json.dumps({"Act1":act1})
     ret= client1.publish("voice_Majooo", message)
 
-else:
-   
+
 
 if st.button('apaga las luces'):
     act1="apaga las luces"
