@@ -32,6 +32,14 @@ client1.on_message = on_message
 
 st.title("MQTT Control")
 
+
+    #client1.subscribe("Sensores")
+
+
+
+else:
+    st.write('Puerta')
+
 if st.button('abre la puerta'):
     act1="abre la puerta"
     client1= paho.Client("GIT-majoo")
@@ -40,13 +48,6 @@ if st.button('abre la puerta'):
     message =json.dumps({"Act1":act1})
     ret= client1.publish("voice_Majooo", message)
 
-    #client1.subscribe("Sensores")
-
-
-
-else:
-    st.write('Puerta')
-    
 if st.button('Cierra la puerta'):
     act1="Cierra la puerta"
     client1= paho.Client("GIT-majoo")
