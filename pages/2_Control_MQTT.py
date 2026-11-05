@@ -43,8 +43,7 @@ if st.button('abre la puerta'):
     #client1.subscribe("Sensores")
 
 
-else:
-    st.write('Cierra la puert')
+
 
 if st.button('Cierra la puerta'):
     act1="Cierra la puerta"
