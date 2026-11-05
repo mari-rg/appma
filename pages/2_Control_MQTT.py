@@ -44,7 +44,9 @@ if st.button('abre la puerta'):
 
 
 
-
+else:
+    st.write('Puerta')
+    
 if st.button('Cierra la puerta'):
     act1="Cierra la puerta"
     client1= paho.Client("GIT-majoo")
@@ -55,7 +57,7 @@ if st.button('Cierra la puerta'):
 
 
 else:
-    st.write('enciende las luces')
+    st.write('Luces')
 
 if st.button('enciende las luces'):
     act1="enciende las luces"
