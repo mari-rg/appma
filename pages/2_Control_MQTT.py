@@ -23,7 +23,7 @@ def on_message(client, userdata, message):
 
 
 
-broker="157.230.214.127"
+broker="broker.mqttdashboard.com"
 port=1883
 client1= paho.Client("GIT-HUB")
 client1.on_message = on_message
@@ -32,27 +32,27 @@ client1.on_message = on_message
 
 st.title("MQTT Control")
 
-if st.button('ON'):
-    act1="ON"
-    client1= paho.Client("GIT-HUB")
+if st.button('abre la puerta'):
+    act1="abre la puerta"
+    client1= paho.Client("GIT-majoo")
     client1.on_publish = on_publish
     client1.connect(broker,port)
     message =json.dumps({"Act1":act1})
-    ret= client1.publish("cmqtt_s", message)
+    ret= client1.publish("voice_Majooo", message)
 
     #client1.subscribe("Sensores")
 
 
 else:
-    st.write('')
+    st.write('Cierra la puerta')
 
 if st.button('OFF'):
-    act1="OFF"
+    act1="Cierra la puerta"
     client1= paho.Client("GIT-HUB")
     client1.on_publish = on_publish
     client1.connect(broker,port)
     message =json.dumps({"Act1":act1})
-    ret= client1.publish("cmqtt_s", message)
+    ret= client1.publish("voice_Majooo", message)
 
 
 else:
