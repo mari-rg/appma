@@ -56,6 +56,29 @@ if st.button('Cierra la puerta'):
 
 
 else:
+    st.write('enciende las luces')
+
+if st.button('enciende las luces'):
+    act1="enciende las luces"
+    client1= paho.Client("GIT-majoo")
+    client1.on_publish = on_publish
+    client1.connect(broker,port)
+    message =json.dumps({"Act1":act1})
+    ret= client1.publish("voice_Majooo", message)
+
+else:
+    st.write('apaga las luces')
+
+if st.button('apaga las luces'):
+    act1="apaga las luces"
+    client1= paho.Client("GIT-majoo")
+    client1.on_publish = on_publish
+    client1.connect(broker,port)
+    message =json.dumps({"Act1":act1})
+    ret= client1.publish("voice_Majooo", message)
+
+
+else:
     st.write('')
 
 values = st.slider('Selecciona el rango de valores',0.0, 100.0)
