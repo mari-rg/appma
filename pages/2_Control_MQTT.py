@@ -44,7 +44,7 @@ if st.button('abre la puerta'):
 
 
 else:
-    st.write('Cierra la puerta')
+    st.write('Cierra la puert')
 
 if st.button('Cierra la puerta'):
     act1="Cierra la puerta"
