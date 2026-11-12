@@ -18,7 +18,9 @@ st.set_page_config(page_title="Mansión Embrujada · MQTT", page_icon="🦇", la
 BROKER, PORT = "broker.mqttdashboard.com", 1883
 TOPIC_VOZ, TOPIC_ANALOG = "voice_Majooo", "cmqtt_a"
 WOKWI_URL = "https://wokwi.com/projects/479874106123681793"
-FONDO = Path(__file__).resolve().parent.parent / "static" / "fondo.jpg"  # imagen de fondo
+RAIZ = Path(__file__).resolve().parent.parent
+# imagen de fondo: la busca en static/fondo.jpg y, si no está, en la raíz del repo (fondo.jpg)
+FONDO = next((f for f in (RAIZ / "static" / "fondo.jpg", RAIZ / "fondo.jpg") if f.exists()), RAIZ / "static" / "fondo.jpg")
 
 # ───────────── ESTADO ─────────────
 ss = st.session_state
