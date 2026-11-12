@@ -30,7 +30,7 @@ client1.on_message = on_message
 
 
 
-st.title("Smart House")
+st.title("MQTT Control")
 
 st.write('Puerta')
 
