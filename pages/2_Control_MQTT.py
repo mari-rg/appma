@@ -1,99 +1,164 @@
-import paho.mqtt.client as paho
-import time
-import streamlit as st
 import json
 import platform
+import time
+import paho.mqtt.client as paho
+import streamlit as st
 
-# Muestra la versión de Python junto con detalles adicionales
-st.write("Versión de Python:", platform.python_version())
+# Configuración de la página (si ya la tienes en Inicio.py, puedes quitar este bloque)
+st.set_page_config(
+    page_title="Control de la Casa | Smart Home",
+    page_icon="🏠",
+    layout="centered",
+)
 
-values = 0.0
-act1="OFF"
+# Estilos CSS para darle apariencia de panel de hogar inteligente
+st.markdown(
+    """
+    <style>
+    .main-header {
+        text-align: center;
+        padding: 0.5rem 0 0.5rem 0;
+    }
+    .status-badge {
+        display: inline-block;
+        background-color: rgba(46, 204, 113, 0.15);
+        color: #2ecc71;
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: 1px solid rgba(46, 204, 113, 0.4);
+    }
+    div.stButton > button {
+        border-radius: 10px;
+        height: 3em;
+        font-weight: 600;
+    }
+    </style>
+""",
+    unsafe_allow_html=True,
+)
 
-def on_publish(client,userdata,result):             #create function for callback
-    print("el dato ha sido publicado \n")
-    pass
+# Parámetros de conexión MQTT (intactos)
+BROKER = "broker.mqttdashboard.com"
+PORT = 1883
+
+
+def on_publish(client, userdata, result):
+  print("El dato ha sido publicado \n")
+
 
 def on_message(client, userdata, message):
-    global message_received
-    time.sleep(2)
-    message_received=str(message.payload.decode("utf-8"))
-    st.write(message_received)
+  global message_received
+  time.sleep(2)
+  message_received = str(message.payload.decode("utf-8"))
+  st.write(message_received)
 
 
+def enviar_comando_hogar(client_id, topico, payload_dict):
+  client = paho.Client(client_id)
+  client.on_publish = on_publish
+  client.connect(BROKER, PORT)
+  mensaje = json.dumps(payload_dict)
+  client.publish(topico, mensaje)
+  client.disconnect()
 
 
-broker="broker.mqttdashboard.com"
-port=1883
-client1= paho.Client("GIT-HUB")
-client1.on_message = on_message
+# Estados visuales iniciales de la casa
+if "estado_puerta" not in st.session_state:
+  st.session_state.estado_puerta = "En espera de orden"
+if "estado_luces" not in st.session_state:
+  st.session_state.estado_luces = "En espera de orden"
 
+# Encabezado principal estilo Smart Home
+st.markdown(
+    """
+    <div class="main-header">
+        <h1>🏠 CONTROL DE LA CASA</h1>
+        <p style="color: gray; margin-top: -10px;">Panel de automatización y control inteligente del hogar</p>
+        <span class="status-badge">● Hogar conectado</span>
+    </div>
+""",
+    unsafe_allow_html=True,
+)
 
+st.divider()
 
-st.title("MQTT Control")
+# --- ZONA 1: ACCESO PRINCIPAL ---
+with st.container(border=True):
+  st.subheader("🚪 Acceso Principal")
+  estado_puerta_texto = st.empty()
 
-st.write('Puerta')
+  col1, col2 = st.columns(2)
+  with col1:
+    if st.button("🔓 Abrir puerta", use_container_width=True):
+      enviar_comando_hogar(
+          "GIT-majoo", "voice_Majooo", {"Act1": "abre la puerta"}
+      )
+      st.session_state.estado_puerta = "Puerta principal abierta"
+      st.toast("Orden enviada: Puerta abierta", icon="🔓")
 
-if st.button('abre la puerta'):
-    act1="abre la puerta"
-    client1= paho.Client("GIT-majoo")
-    client1.on_publish = on_publish
-    client1.connect(broker,port)
-    message =json.dumps({"Act1":act1})
-    ret= client1.publish("voice_Majooo", message)
-    #client1.subscribe("Sensores")
+  with col2:
+    if st.button("🔒 Cerrar puerta", use_container_width=True):
+      enviar_comando_hogar(
+          "GIT-majoo", "voice_Majooo", {"Act1": "Cierra la puerta"}
+      )
+      st.session_state.estado_puerta = "Puerta principal cerrada"
+      st.toast("Orden enviada: Puerta cerrada", icon="🔒")
 
+  estado_puerta_texto.caption(
+      f"Última acción: **{st.session_state.estado_puerta}**"
+  )
 
+# --- ZONA 2: ILUMINACIÓN ---
+with st.container(border=True):
+  st.subheader("💡 Iluminación del Hogar")
+  estado_luces_texto = st.empty()
 
-else:
-    st.write('')
+  col3, col4 = st.columns(2)
+  with col3:
+    if st.button("☀️ Encender luces", use_container_width=True):
+      enviar_comando_hogar(
+          "GIT-majoo", "voice_Majooo", {"Act1": "enciende las luces"}
+      )
+      st.session_state.estado_luces = "Luces encendidas"
+      st.toast("Orden enviada: Luces encendidas", icon="💡")
 
+  with col4:
+    if st.button("🌙 Apagar luces", use_container_width=True):
+      enviar_comando_hogar(
+          "GIT-majoo", "voice_Majooo", {"Act1": "apaga las luces"}
+      )
+      st.session_state.estado_luces = "Luces apagadas"
+      st.toast("Orden enviada: Luces apagadas", icon="🌙")
 
+  estado_luces_texto.caption(
+      f"Última acción: **{st.session_state.estado_luces}**"
+  )
 
-if st.button('Cierra la puerta'):
-    act1="Cierra la puerta"
-    client1= paho.Client("GIT-majoo")
-    client1.on_publish = on_publish
-    client1.connect(broker,port)
-    message =json.dumps({"Act1":act1})
-    ret= client1.publish("voice_Majooo", message)
+# --- ZONA 3: REGULACIÓN ANALÓGICA ---
+with st.container(border=True):
+  st.subheader("🎚️ Regulación de Ambiente")
+  st.caption(
+      "Ajusta el nivel porcentual (intensidad de iluminación, apertura de"
+      " persianas o climatización)"
+  )
 
+  values = st.slider(
+      "Nivel deseado (%)",
+      min_value=0.0,
+      max_value=100.0,
+      value=0.0,
+      format="%.0f%%",
+  )
 
-else:
-    st.write('Luces')
+  if st.button(
+      "📡 Aplicar ajuste en la casa", use_container_width=True, type="primary"
+  ):
+    enviar_comando_hogar("GIT-HUB", "cmqtt_a", {"Analog": float(values)})
+    st.success(f"✅ Ajuste aplicado al {values:.0f}% en el sistema del hogar.")
 
-if st.button('enciende las luces'):
-    act1="enciende las luces"
-    client1= paho.Client("GIT-majoo")
-    client1.on_publish = on_publish
-    client1.connect(broker,port)
-    message =json.dumps({"Act1":act1})
-    ret= client1.publish("voice_Majooo", message)
-
-
-
-if st.button('apaga las luces'):
-    act1="apaga las luces"
-    client1= paho.Client("GIT-majoo")
-    client1.on_publish = on_publish
-    client1.connect(broker,port)
-    message =json.dumps({"Act1":act1})
-    ret= client1.publish("voice_Majooo", message)
-
-
-else:
-    st.write('')
-
-values = st.slider('Selecciona el rango de valores',0.0, 100.0)
-st.write('Values:', values)
-
-if st.button('Enviar valor analógico'):
-    client1= paho.Client("GIT-HUB")
-    client1.on_publish = on_publish
-    client1.connect(broker,port)
-    message =json.dumps({"Analog": float(values)})
-    ret= client1.publish("cmqtt_a", message)
-
-
-else:
-    st.write('')
+# Detalle técnico discreto en la barra lateral
+with st.sidebar:
+  st.divider()
+  st.caption(f"⚙️ Núcleo activo | Python {platform.python_version()}")
