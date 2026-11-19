@@ -22,6 +22,20 @@ RAIZ = Path(__file__).resolve().parent.parent
 # imagen de fondo: la busca en static/fondo.jpg y, si no está, en la raíz del repo (fondo.jpg)
 FONDO = next((f for f in (RAIZ / "static" / "fondo.jpg", RAIZ / "fondo.jpg") if f.exists()), RAIZ / "static" / "fondo.jpg")
 
+# Sonidos (sube los 4 .mp3 a la raíz del repo, junto a fondo.jpg)
+SONIDOS = {
+    "puerta_abre": "sonido_1.mp3",
+    "puerta_cierra": "sonido_2.mp3",
+    "luz_on": "sonido_3.mp3",
+    "luz_off": "sonido_4.mp3",
+}
+SONIDO_DE_COMANDO = {
+    "abre la puerta": "puerta_abre",
+    "Cierra la puerta": "puerta_cierra",
+    "enciende las luces": "luz_on",
+    "apaga las luces": "luz_off",
+}
+
 # ───────────── ESTADO ─────────────
 ss = st.session_state
 ss.setdefault("puerta", "cerrada")
@@ -29,6 +43,7 @@ ss.setdefault("luces", False)
 ss.setdefault("valor", 0.0)
 ss.setdefault("log", [])
 ss.setdefault("voz_msg", "")
+ss.setdefault("sonido", None)
 
 
 def publicar(topic, payload):
@@ -54,6 +69,7 @@ def publicar(topic, payload):
 def comando(texto, **estado):
     if publicar(TOPIC_VOZ, {"Act1": texto}):
         ss.update(estado)
+        ss.sonido = SONIDO_DE_COMANDO.get(texto)  # suena solo si el mensaje salió bien
 
 
 def enviar_analogico():
@@ -123,6 +139,30 @@ else{
 }
 </script>
 """
+
+
+@st.cache_data
+def sonido_b64(nombre):
+    for ruta in (RAIZ / nombre, RAIZ / "sonidos" / nombre, RAIZ / "static" / nombre):
+        if ruta.exists():
+            return base64.b64encode(ruta.read_bytes()).decode()
+    return None
+
+
+JS_SONIDO = """<script>
+const P=window.parent, K='__CLAVE__';  // __N__
+if(K==='luz_on'||K==='luz_off'){ if(P.__luz){P.__luz.pause();P.__luz=null;} }
+const A=new P.Audio('data:audio/mpeg;base64,__B64__');
+if(K==='luz_on'){P.__luz=A;}
+A.play().catch(()=>{});
+</script>"""
+
+
+def reproducir(clave):
+    b64 = sonido_b64(SONIDOS[clave])
+    if b64:
+        js = JS_SONIDO.replace("__CLAVE__", clave).replace("__N__", str(time.time_ns())).replace("__B64__", b64)
+        components.html(js, height=0)
 
 
 @st.cache_data
@@ -251,6 +291,10 @@ filas = "".join(
     for h, t, m, ok in ss.log
 ) or "<div>Aún no has lanzado ningún hechizo…</div>"
 st.markdown(f'<div class="grim">📜 <b>Grimorio de transmisiones</b>{filas}</div>', unsafe_allow_html=True)
+
+if ss.sonido:
+    reproducir(ss.sonido)
+    ss.sonido = None
 
 with st.expander("Detalles técnicos"):
     st.write("Versión de Python:", platform.python_version())
